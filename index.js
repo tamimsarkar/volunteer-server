@@ -57,4 +57,4 @@ app.get('/', (req, res) => {
   res.send('This is the volunteer api')
 })
 
-app.listen(port)
+app.listen(process.env.PORT || port)
