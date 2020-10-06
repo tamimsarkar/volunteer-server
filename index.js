@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 require('dotenv').config()
+const admin = require('firebase-admin');
 const cors = require('cors')
 const ObjectID = require('mongodb').ObjectID
 const MongoClient = require('mongodb').MongoClient;
@@ -13,6 +14,15 @@ const port = 4000
 app.use(cors())
 app.use(bodyParser.json());
 
+var serviceAccount = require("./configs/volunteer-67c35-firebase-adminsdk-im7cc-725e65599e.json");
+
+// firebase Admin
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.DB_FIRE
+});
 //MongoDB
 
 
@@ -30,10 +40,32 @@ MongoClient.connect(uri, function(err, client) {
   
   // Get registers
   app.get('/registers' , (req,res) => {
-    registerCollection.find({})
-    .toArray((err,document) => {
-      res.send(document)
-    })
+    const bearer = req.headers.authorization;
+        if(bearer && bearer.startsWith('Bearer ')){
+            const idToken = bearer.split(' ')[1]
+           
+        admin.auth().verifyIdToken(idToken)
+            .then(function (decodedToken) {
+                const tokenEmail = decodedToken.email;
+                const queryEmail = req.query.email;
+                if(tokenEmail == queryEmail){
+
+                    registerCollection.find({ email : queryEmail})
+                    .toArray((err, documents) => {
+                        res.status(200).send(documents)
+                    })
+                }else{
+                    res.status(401).send("un Authorized")
+                }
+                // ...
+            }).catch(function (error) {
+                // Handle error
+                res.status(401).send("un Authorized...")
+            });
+        }
+        else{
+            res.status(401).send("un Authorized")
+        }
   })
   // register collection
   app.post('/registers',(req,res) => {
