@@ -43,6 +43,15 @@ MongoClient.connect(uri, function(err, client) {
       res.send(result.insertedCount > 0)
     })
   })
+
+  // post volunteer service
+  app.post('/events',(req,res) => {
+    const newEvent = req.body;
+    Collection.insertOne(newEvent)
+    .then(result => {
+      res.send(result.insertedCount > 0)
+    })
+  })
   app.delete('/delete/:id',(req,res) => {
     registerCollection.deleteOne({_id : ObjectID(req.params.id)})
     .then(result => {
