@@ -47,7 +47,7 @@ MongoClient.connect(uri, function(err, client) {
   // post volunteer service
   app.post('/events',(req,res) => {
     const newEvent = req.body;
-    Collection.insertOne(newEvent)
+    collection.insertOne(newEvent)
     .then(result => {
       res.send(result.insertedCount > 0)
     })
